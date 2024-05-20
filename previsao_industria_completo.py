@@ -1,4 +1,4 @@
-# %% [markdown]
+Industria da Transformação# %% [markdown]
 # Previsão de crescimento da Indústria de Transformação
 
 # %% [markdown]
@@ -18,10 +18,10 @@ import locale
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.linear_model import LinearRegression
 from datetime import datetime
-from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.metrics import mean_squared_error
 pd.set_option('display.max_columns', None)
 from statsmodels.tsa.ar_model import AutoReg
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import r2_score
 from statsmodels.tsa.stattools import arma_order_select_ic
 
 # %%
@@ -97,6 +97,17 @@ dfEWMA
 # %%
 #Plotando Média Móvel Exponencialmente Ponderada
 dfEWMA.plot(figsize=(18,10))
+
+# %%
+#Identificando Outliers
+def detect_outliers_iqr(data):
+    Q1 = np.percentile(data, 25)
+    Q3 = np.percentile(data, 75)
+    IQR = Q3 - Q1
+    lower_bound = Q1 - 1.5 * IQR
+    upper_bound = Q3 + 1.5 * IQR
+    outliers = (data < lower_bound) | (data > upper_bound)
+    return outliers
 
 # %%
 #Identificando Outliers
@@ -211,20 +222,6 @@ model = LinearRegression()
 model.fit(X_train, y_train)
 
 # %%
-# Calcular métricas de desempenho
-mse = mean_squared_error(y_test, y_pred)
-# MAE
-mae = mean_absolute_error(y_test, y_pred)
-r2 = r2_score(y_test, y_pred)
-
-# %%
-
-# Imprimir as métricas de desempenho
-print("Mean Squared Error:", mse)
-print("Mean Absolute Error (MAE)",mae)
-print("R-squared (R²)", r2)
-
-# %%
 # Fazer previsões usando os dados de teste
 y_pred = model.predict(X_test)
 
@@ -279,7 +276,7 @@ df_transformacao.head()
 
 # %%
 # Remover linhas com valores NaN
-df_ind_clean = df_ind.dropna(subset=['Previsões'])
+#df_ind_clean = df_ind.dropna(subset=['Previsões'])
 
 # %%
 # Converter o índice de predictions_df para o tipo datetime
@@ -311,6 +308,18 @@ plt.legend()
 plt.grid(False)
 plt.show()
 
+# %%
+# Calcular métricas de desempenho
+mse = mean_squared_error(y_test, y_pred)
+# MAE
+mae = mean_absolute_error(y_test, y_pred)
+r2 = r2_score(y_test, y_pred)
+
+# %%
+# Imprimir as métricas de desempenho
+print("Mean Squared Error:", mse)
+print("Mean Absolute Error (MAE)",mae)
+print("R-squared (R²)", r2)
 
 # %% [markdown]
 # Modelo 3: Modelo auto-regressivo
